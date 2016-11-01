@@ -1,0 +1,4 @@
+[Project]
+Name=cpg_interface
+Manager=KDevCMakeManager
+VersionControl=kdevgit
