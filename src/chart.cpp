@@ -42,6 +42,9 @@ Chart::Chart(QWidget *parent)
     , m_chart_e(nullptr)
     , m_chart_f(nullptr)
 {
+    unsigned int history = 100; //points
+    unsigned int timer_wait = 30; //ms
+
     m_chart_e = new QChart;
     m_chart_f = new QChart;
     QChartView *chartView_e = new QChartView(m_chart_e, this);
@@ -49,39 +52,78 @@ Chart::Chart(QWidget *parent)
     chartView_e->setMinimumSize(400,400);
     chartView_f->setMinimumSize(400,400);
     m_series_e = new QLineSeries;
+    m_series_phi_e = new QLineSeries;
     m_series_f = new QLineSeries;
+    m_series_phi_f = new QLineSeries;
     m_chart_e->addSeries(m_series_e);
+    m_chart_e->addSeries(m_series_phi_e);
     m_chart_f->addSeries(m_series_f);
-    QValueAxis *axisX = new QValueAxis;
-    axisX->setRange(0, 2000);
-    axisX->setLabelFormat("%g");
-    axisX->setTitleText("Samples");
+    m_chart_f->addSeries(m_series_phi_f);
 
-    QValueAxis *axisY = new QValueAxis;
-    axisY->setRange(-1, 1);
-    axisY->setTitleText("Value level");
+    QValueAxis *axisX;
+    QValueAxis *axisY;
+    QValueAxis *axisY_phi;
 
-    m_chart_e->setAxisX(axisX, m_series_e);
-    m_chart_e->setAxisY(axisY, m_series_e);
-    m_chart_e->legend()->hide();
-    m_chart_e->setTitle("Data from the neuron e");
-
+    // E
     axisX = new QValueAxis;
-    axisX->setRange(0, 2000);
+    axisX->setRange(0, history);
     axisX->setLabelFormat("%g");
     axisX->setTitleText("Samples");
-
     axisY = new QValueAxis;
     axisY->setRange(-1, 1);
     axisY->setTitleText("Value level");
-    m_chart_f->setAxisX(axisX, m_series_f);
-    m_chart_f->setAxisY(axisY, m_series_f);
+    axisY_phi = new QValueAxis;
+    axisY_phi->setRange(-100000, 100000);
+    axisY_phi->setTitleText("Phi");
+
+    m_chart_e->legend()->hide();
+    m_chart_e->setTitle("Data from the neuron e");
+    axisY->setLinePenColor(m_series_e->pen().color());
+    axisY_phi->setLinePenColor(m_series_phi_e->pen().color());
+
+    m_chart_e->addAxis(axisX, Qt::AlignBottom);
+    m_chart_e->addAxis(axisY, Qt::AlignLeft);
+    m_chart_e->addAxis(axisY_phi, Qt::AlignRight);
+    m_series_e->attachAxis(axisX);
+    m_series_e->attachAxis(axisY);
+    m_series_phi_e->attachAxis(axisX);
+    m_series_phi_e->attachAxis(axisY_phi);
+
+    // F
+    axisX = new QValueAxis;
+    axisX->setRange(0, history);
+    axisX->setLabelFormat("%g");
+    axisX->setTitleText("Samples");
+    axisY = new QValueAxis;
+    axisY->setRange(-1, 1);
+    axisY->setTitleText("Value level");
+    axisY_phi = new QValueAxis;
+    axisY_phi->setRange(-100000, 100000);
+    axisY_phi->setTitleText("Phi");
+
     m_chart_f->legend()->hide();
-    m_chart_f->setTitle("Data from the neuron f");
+    m_chart_f->setTitle("Data from the neuron e");
+    axisY->setLinePenColor(m_series_f->pen().color());
+    axisY_phi->setLinePenColor(m_series_phi_f->pen().color());
 
+    m_chart_f->addAxis(axisX, Qt::AlignBottom);
+    m_chart_f->addAxis(axisY, Qt::AlignLeft);
+    m_chart_f->addAxis(axisY_phi, Qt::AlignRight);
+    m_series_f->attachAxis(axisX);
+    m_series_f->attachAxis(axisY);
+    m_series_phi_f->attachAxis(axisX);
+    m_series_phi_f->attachAxis(axisY_phi);
 
-    m_rythm = new RythmGeneratorTimed(this);
-    RythmToChart *to_chart = new RythmToChart(m_series_e, m_series_f, m_rythm, this);
+    // rythm generator and chart-rythm connection
+    m_rythm = new RythmGeneratorTimed(timer_wait,this);
+    RythmToChart *to_chart = new RythmToChart(
+        m_series_e,
+        m_series_f,
+        m_series_phi_e,
+        m_series_phi_f,
+        m_rythm,
+        history,
+        this);
 
 
     QHBoxLayout *mainLayout = new QHBoxLayout;

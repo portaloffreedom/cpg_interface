@@ -28,7 +28,7 @@ class RythmGeneratorTimed : public QObject
 {
     Q_OBJECT
 public:
-    RythmGeneratorTimed(QObject *parent = nullptr);
+    RythmGeneratorTimed(int timer_wait,QObject *parent = nullptr);
     virtual ~RythmGeneratorTimed();
 
     void start();
@@ -37,7 +37,7 @@ public:
     revolve::brain::cpg::RythmGenerationNeuron* getRGF();
 
 signals:
-    void neuron_output(float e, float f);
+    void neuron_output(float e, float f, float phi_e, float phi_f);
 
 private:
     void generate_output();
@@ -45,6 +45,7 @@ private:
 // Class Variables
 private:
     QTimer *timer;
+    int interval;
 
     revolve::brain::cpg::RythmGenerationNeuron *rge;
     revolve::brain::cpg::RythmGenerationNeuron *rgf;

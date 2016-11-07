@@ -30,16 +30,25 @@ class RythmToChart : public QObject
 public:
     RythmToChart(QtCharts::QXYSeries* series_e,
                  QtCharts::QXYSeries* series_f,
+                 QtCharts::QXYSeries* series_phi_e,
+                 QtCharts::QXYSeries *series_phi_f,
                  RythmGeneratorTimed* rythm_generator_timed,
+                 qint64 range,
                  QObject* parent = nullptr);
     ~RythmToChart();
 
 public slots:
-    void dataReady(float e, float f);
+    void dataReady(float e, float f, float phi_e, float phi_f);
 
 private:
+    void addPoint(QtCharts::QXYSeries *series, float point) const;
+
+private:
+    qint64 m_range;
     QtCharts::QXYSeries *m_series_e;
     QtCharts::QXYSeries *m_series_f;
+    QtCharts::QXYSeries *m_series_phi_e;
+    QtCharts::QXYSeries *m_series_phi_f;
     RythmGeneratorTimed *m_rythm_generator_timed;
 };
 

@@ -23,11 +23,17 @@
 
 RythmToChart::RythmToChart(QtCharts::QXYSeries* series_e,
                            QtCharts::QXYSeries *series_f,
+                           QtCharts::QXYSeries* series_phi_e,
+                           QtCharts::QXYSeries *series_phi_f,
                            RythmGeneratorTimed* rythm_generator_timed,
+                           qint64 range,
                            QObject* parent)
     : QObject(parent)
+    , m_range(range)
     , m_series_e(series_e)
     , m_series_f(series_f)
+    , m_series_phi_e(series_phi_e)
+    , m_series_phi_f(series_phi_f)
     , m_rythm_generator_timed(rythm_generator_timed)
 {
     connect(m_rythm_generator_timed, &RythmGeneratorTimed::neuron_output,
@@ -38,13 +44,12 @@ RythmToChart::~RythmToChart()
 {
 }
 
-void addPoint(QtCharts::QXYSeries *series, float point)
+void RythmToChart::addPoint(QtCharts::QXYSeries *series, float point) const
 {
-    qint64 range = 2000;
     QVector<QPointF> oldPoints = series->pointsVector();
     QVector<QPointF> points;
 
-    if (oldPoints.count() < range) {
+    if (oldPoints.count() < m_range) {
         points = series->pointsVector();
     } else {
         for (int i = 1; i < oldPoints.count(); i++)
@@ -57,10 +62,14 @@ void addPoint(QtCharts::QXYSeries *series, float point)
     series->replace(points);
 }
 
-void RythmToChart::dataReady(float e, float f)
+#include <iostream>
+
+void RythmToChart::dataReady(float e, float f, float phi_e, float phi_f)
 {
     addPoint(m_series_e, e);
     addPoint(m_series_f, f);
+    addPoint(m_series_phi_e, phi_e);
+    addPoint(m_series_phi_f, phi_f);
 }
 
 

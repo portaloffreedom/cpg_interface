@@ -19,9 +19,10 @@
 
 #include "rythmgeneratortimed.h"
 
-RythmGeneratorTimed::RythmGeneratorTimed(QObject *parent)
+RythmGeneratorTimed::RythmGeneratorTimed(int timer_wait, QObject *parent)
     : QObject(parent)
     , timer(nullptr)
+    , interval(timer_wait)
     , rge(nullptr)
     , rgf(nullptr)
 {
@@ -32,7 +33,7 @@ RythmGeneratorTimed::RythmGeneratorTimed(QObject *parent)
     rgf = new cpg::RythmGenerationNeuron(1,1,1,0);
 
     connect(timer, &QTimer::timeout, this, &RythmGeneratorTimed::generate_output);
-    timer->setInterval(1);
+    timer->setInterval(interval);
 }
 
 RythmGeneratorTimed::~RythmGeneratorTimed()
@@ -71,7 +72,7 @@ void RythmGeneratorTimed::generate_output()
     output_e = result_e[0];
     output_f = result_f[0];
 
-    emit neuron_output(output_e, output_f);
+    emit neuron_output(output_e, output_f, phi_e, phi_f);
 }
 
 
