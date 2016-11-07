@@ -75,6 +75,10 @@ void RythmGeneratorTimed::generate_output()
     emit neuron_output(output_e, output_f, phi_e, phi_f);
 }
 
+void RythmGeneratorTimed::setUpdateTimerDelay(int delay)
+{
+    timer->setInterval(delay);
+}
 
 
 #include "rythmgeneratortimed.moc"

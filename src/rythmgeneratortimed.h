@@ -33,6 +33,8 @@ public:
 
     void start();
 
+    void setUpdateTimerDelay(int delay);
+
     revolve::brain::cpg::RythmGenerationNeuron* getRGE();
     revolve::brain::cpg::RythmGenerationNeuron* getRGF();
 

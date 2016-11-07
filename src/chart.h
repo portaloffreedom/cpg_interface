@@ -50,6 +50,9 @@ public:
     Chart(QWidget *parent = nullptr);
     ~Chart();
 
+public slots:
+    void setUpdateTimerDelay(int delay);
+
 private:
     QFormLayout *add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *neuron);
 

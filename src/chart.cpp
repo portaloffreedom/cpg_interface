@@ -214,20 +214,29 @@ QFormLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuro
         float new_value = neuron->setAmplitudePercentage(value/10.0);
         amplitude_value_label->setText(QString("amplitude: ") + QString::number(new_value, number_format, number_precision));
     });
+//     amplitude_slider->setValue(neuron->setAmplitudePercentage(50));
     connect(offset_slider, &QSlider::valueChanged, [neuron, offset_value_label] (int value) {
         float new_value = neuron->setOffsetPercentage(value/10.0);
         offset_value_label->setText(QString("offset: ") + QString::number(new_value, number_format, number_precision));
     });
+//     offset_slider->setValue(0);
     connect(weight_slider, &QSlider::valueChanged, [neuron, weight_value_label] (int value) {
         float new_value = neuron->setWeightPercentage(value/10.0);
         weight_value_label->setText(QString("weight: ") + QString::number(new_value, number_format, number_precision));
     });
+//     weight_slider->setValue(neuron->setWeightPercentage(0));
     connect(phase_slider, &QSlider::valueChanged, [neuron, phase_value_label] (int value) {
         float new_value = neuron->setCPercentage(value/10.0);
         phase_value_label->setText(QString("phase: ") + QString::number(new_value, number_format, number_precision));
     });
+//     phase_slider->setValue(neuron->setCPercentage(50));
 
     return form_layout;
+}
+
+void Chart::setUpdateTimerDelay(int delay)
+{
+    m_rythm->setUpdateTimerDelay(delay);
 }
 
 
