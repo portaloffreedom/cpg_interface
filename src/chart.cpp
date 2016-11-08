@@ -47,18 +47,23 @@ Chart::Chart(QWidget *parent)
 
     m_chart_e = new QChart;
     m_chart_f = new QChart;
+    m_chart_d = new QChart;
     QChartView *chartView_e = new QChartView(m_chart_e, this);
     QChartView *chartView_f = new QChartView(m_chart_f, this);
+    QChartView *chartView_d = new QChartView(m_chart_d, this);
     chartView_e->setMinimumSize(400,400);
     chartView_f->setMinimumSize(400,400);
+    chartView_d->setMinimumSize(400,400);
     m_series_e = new QLineSeries;
     m_series_phi_e = new QLineSeries;
     m_series_f = new QLineSeries;
     m_series_phi_f = new QLineSeries;
+    m_series_d = new QLineSeries;
     m_chart_e->addSeries(m_series_e);
     m_chart_e->addSeries(m_series_phi_e);
     m_chart_f->addSeries(m_series_f);
     m_chart_f->addSeries(m_series_phi_f);
+    m_chart_d->addSeries(m_series_d);
 
     QValueAxis *axisX;
     QValueAxis *axisY;
@@ -102,7 +107,7 @@ Chart::Chart(QWidget *parent)
     axisY_phi->setTitleText("Phi");
 
     m_chart_f->legend()->hide();
-    m_chart_f->setTitle("Data from the neuron e");
+    m_chart_f->setTitle("Data from the neuron f");
     axisY->setLinePenColor(m_series_f->pen().color());
     axisY_phi->setLinePenColor(m_series_phi_f->pen().color());
 
@@ -114,11 +119,29 @@ Chart::Chart(QWidget *parent)
     m_series_phi_f->attachAxis(axisX);
     m_series_phi_f->attachAxis(axisY_phi);
 
+    // Difference
+    axisX = new QValueAxis;
+    axisX->setRange(0, history);
+    axisX->setLabelFormat("%g");
+    axisX->setTitleText("Samples");
+    axisY = new QValueAxis;
+    axisY->setRange(-2, 2);
+    axisY->setTitleText("Difference");
+
+    m_chart_d->legend()->hide();
+    m_chart_d->setTitle("subtraction of the two data");
+
+    m_chart_d->addAxis(axisX, Qt::AlignBottom);
+    m_chart_d->addAxis(axisY, Qt::AlignLeft);
+    m_series_d->attachAxis(axisX);
+    m_series_d->attachAxis(axisY);
+
     // rythm generator and chart-rythm connection
     m_rythm = new RythmGeneratorTimed(timer_wait,this);
     RythmToChart *to_chart = new RythmToChart(
         m_series_e,
         m_series_f,
+        m_series_d,
         m_series_phi_e,
         m_series_phi_f,
         m_rythm,
@@ -145,6 +168,14 @@ Chart::Chart(QWidget *parent)
 
         mainLayout->addLayout(f_layout);
     }
+
+    {
+        QVBoxLayout *d_layout = new QVBoxLayout;
+        d_layout->addWidget(chartView_d);
+
+        mainLayout->addLayout(d_layout);
+    }
+
 
 
 

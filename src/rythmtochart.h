@@ -30,6 +30,7 @@ class RythmToChart : public QObject
 public:
     RythmToChart(QtCharts::QXYSeries* series_e,
                  QtCharts::QXYSeries* series_f,
+                 QtCharts::QXYSeries* series_d,
                  QtCharts::QXYSeries* series_phi_e,
                  QtCharts::QXYSeries *series_phi_f,
                  RythmGeneratorTimed* rythm_generator_timed,
@@ -47,6 +48,7 @@ private:
     qint64 m_range;
     QtCharts::QXYSeries *m_series_e;
     QtCharts::QXYSeries *m_series_f;
+    QtCharts::QXYSeries *m_series_d;
     QtCharts::QXYSeries *m_series_phi_e;
     QtCharts::QXYSeries *m_series_phi_f;
     RythmGeneratorTimed *m_rythm_generator_timed;

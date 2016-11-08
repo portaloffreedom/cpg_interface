@@ -23,6 +23,7 @@
 
 RythmToChart::RythmToChart(QtCharts::QXYSeries* series_e,
                            QtCharts::QXYSeries *series_f,
+                           QtCharts::QXYSeries *series_d,
                            QtCharts::QXYSeries* series_phi_e,
                            QtCharts::QXYSeries *series_phi_f,
                            RythmGeneratorTimed* rythm_generator_timed,
@@ -32,6 +33,7 @@ RythmToChart::RythmToChart(QtCharts::QXYSeries* series_e,
     , m_range(range)
     , m_series_e(series_e)
     , m_series_f(series_f)
+    , m_series_d(series_d)
     , m_series_phi_e(series_phi_e)
     , m_series_phi_f(series_phi_f)
     , m_rythm_generator_timed(rythm_generator_timed)
@@ -68,6 +70,7 @@ void RythmToChart::dataReady(float e, float f, float phi_e, float phi_f)
 {
     addPoint(m_series_e, e);
     addPoint(m_series_f, f);
+    addPoint(m_series_d, e-f);
     addPoint(m_series_phi_e, phi_e);
     addPoint(m_series_phi_f, phi_f);
 }

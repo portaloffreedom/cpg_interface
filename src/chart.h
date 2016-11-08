@@ -61,10 +61,12 @@ private:
     XYSeriesIODevice *m_device;
     QLineSeries *m_series_e;
     QLineSeries *m_series_f;
+    QLineSeries *m_series_d;
     QLineSeries *m_series_phi_e;
     QLineSeries *m_series_phi_f;
     QChart *m_chart_e;
     QChart *m_chart_f;
+    QChart *m_chart_d;
     QAudioInput *m_audioInput;
 };
 
