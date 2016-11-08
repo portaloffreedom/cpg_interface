@@ -25,9 +25,10 @@
 #include <QtCharts/QChart>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtCharts/QValueAxis>
 #include "xyseriesiodevice.h"
 #include "rythmgeneratortimed.h"
@@ -154,7 +155,7 @@ Chart::Chart(QWidget *parent)
     {
         QVBoxLayout *e_layout = new QVBoxLayout;
         e_layout->addWidget(chartView_e);
-        QFormLayout *form_layout = add_control_layout(m_rythm->getRGE());
+        QLayout *form_layout = add_control_layout(m_rythm->getRGE());
         e_layout->addLayout(form_layout);
 
         mainLayout->addLayout(e_layout);
@@ -163,7 +164,7 @@ Chart::Chart(QWidget *parent)
     {
         QVBoxLayout *f_layout = new QVBoxLayout;
         f_layout->addWidget(chartView_f);
-        QFormLayout *form_layout = add_control_layout(m_rythm->getRGF());
+        QLayout *form_layout = add_control_layout(m_rythm->getRGF());
         f_layout->addLayout(form_layout);
 
         mainLayout->addLayout(f_layout);
@@ -208,13 +209,13 @@ Chart::~Chart()
 }
 
 
-QFormLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *neuron)
+QLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *neuron)
 {
     static const char number_format = 'f';
     static const int number_precision = 2;
 
 
-    QFormLayout *form_layout = new QFormLayout;
+    QGridLayout *grid_layout = new QGridLayout;
 
     QSlider *amplitude_slider = new QSlider(Qt::Horizontal, this);
     QSlider *offset_slider = new QSlider(Qt::Horizontal, this);
@@ -236,33 +237,110 @@ QFormLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuro
     weight_slider->setMaximum(1000);
     phase_slider->setMaximum(1000);
 
-    form_layout->addRow(amplitude_value_label,amplitude_slider);
-    form_layout->addRow(offset_value_label,offset_slider);
-    form_layout->addRow(weight_value_label,weight_slider);
-    form_layout->addRow(phase_value_label,phase_slider);
+    QDoubleSpinBox *amplitude_spin = new QDoubleSpinBox(this);
+    QDoubleSpinBox *offset_spin = new QDoubleSpinBox(this);
+    QDoubleSpinBox *weight_spin = new QDoubleSpinBox(this);
+    QDoubleSpinBox *phase_spin = new QDoubleSpinBox(this);
 
-    connect(amplitude_slider, &QSlider::valueChanged, [neuron, amplitude_value_label] (int value) {
-        float new_value = neuron->setAmplitudePercentage(value/10.0);
-        amplitude_value_label->setText(QString("amplitude: ") + QString::number(new_value, number_format, number_precision));
-    });
-//     amplitude_slider->setValue(neuron->setAmplitudePercentage(50));
-    connect(offset_slider, &QSlider::valueChanged, [neuron, offset_value_label] (int value) {
-        float new_value = neuron->setOffsetPercentage(value/10.0);
-        offset_value_label->setText(QString("offset: ") + QString::number(new_value, number_format, number_precision));
-    });
-//     offset_slider->setValue(0);
-    connect(weight_slider, &QSlider::valueChanged, [neuron, weight_value_label] (int value) {
-        float new_value = neuron->setWeightPercentage(value/10.0);
-        weight_value_label->setText(QString("weight: ") + QString::number(new_value, number_format, number_precision));
-    });
-//     weight_slider->setValue(neuron->setWeightPercentage(0));
-    connect(phase_slider, &QSlider::valueChanged, [neuron, phase_value_label] (int value) {
-        float new_value = neuron->setCPercentage(value/10.0);
-        phase_value_label->setText(QString("phase: ") + QString::number(new_value, number_format, number_precision));
-    });
-//     phase_slider->setValue(neuron->setCPercentage(50));
+    amplitude_spin->setSingleStep(0.05);
+    offset_spin->setSingleStep(0.05);
+    weight_spin->setSingleStep(0.05);
+    phase_spin->setSingleStep(0.05);
 
-    return form_layout;
+    amplitude_spin->setMinimum(neuron->AMPLITUDE_MIN);
+    amplitude_spin->setMaximum(neuron->AMPLITUDE_MAX);
+    offset_spin->setMinimum(neuron->OFFSET_MIN);
+    offset_spin->setMaximum(neuron->OFFSET_MAX);
+    weight_spin->setMinimum(neuron->WEIGHT_MIN);
+    weight_spin->setMaximum(neuron->WEIGHT_MAX);
+    phase_spin->setMinimum(neuron->C_MIN);
+    phase_spin->setMaximum(neuron->C_MAX);
+
+
+    grid_layout->addWidget(amplitude_value_label, 1, 1);
+    grid_layout->addWidget(amplitude_spin       , 1, 2);
+    grid_layout->addWidget(amplitude_slider     , 1, 3);
+    grid_layout->addWidget(offset_value_label   , 2, 1);
+    grid_layout->addWidget(offset_spin          , 2, 2);
+    grid_layout->addWidget(offset_slider        , 2, 3);
+    grid_layout->addWidget(weight_value_label   , 3, 1);
+    grid_layout->addWidget(weight_spin          , 3, 2);
+    grid_layout->addWidget(weight_slider        , 3, 3);
+    grid_layout->addWidget(phase_value_label    , 4, 1);
+    grid_layout->addWidget(phase_spin           , 4, 2);
+    grid_layout->addWidget(phase_slider         , 4, 3);
+
+
+    // Sliders connections
+    connect(amplitude_slider, &QSlider::valueChanged, [neuron, amplitude_spin] (int value) {
+        float new_value = neuron->setAmplitudePercentage(value/1000.0);
+        amplitude_spin->blockSignals(true);
+        amplitude_spin->setValue(new_value);
+        amplitude_spin->blockSignals(false);
+    });
+    connect(offset_slider, &QSlider::valueChanged, [neuron, offset_spin] (int value) {
+        float new_value = neuron->setOffsetPercentage(value/1000.0);
+        offset_spin->blockSignals(true);
+        offset_spin->setValue(new_value);
+        offset_spin->blockSignals(false);
+    });
+    connect(weight_slider, &QSlider::valueChanged, [neuron, weight_spin] (int value) {
+        float new_value = neuron->setWeightPercentage(value/1000.0);
+        weight_spin->blockSignals(true);
+        weight_spin->setValue(new_value);
+        weight_spin->blockSignals(false);
+    });
+    connect(phase_slider, &QSlider::valueChanged, [neuron, phase_spin] (int value) {
+        float new_value = neuron->setCPercentage(value/1000.0);
+        phase_spin->blockSignals(true);
+        phase_spin->setValue(new_value);
+        phase_spin->blockSignals(false);
+    });
+
+    // Spin connections
+    connect(amplitude_spin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [neuron, amplitude_slider] (double value)
+    {
+        amplitude_slider->blockSignals(true);
+        amplitude_slider->setValue(neuron->calculateAmplitudePercentage(value)*1000);
+        amplitude_slider->blockSignals(false);
+        neuron->setAmplitude(value);
+    });
+    connect(offset_spin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [neuron, offset_slider] (double value)
+    {
+        offset_slider->blockSignals(true);
+        offset_slider->setValue(neuron->calculateOffsetPercentage(value)*1000);
+        neuron->setOffset(value);
+    });
+    connect(weight_spin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [neuron, weight_slider] (double value)
+    {
+        weight_slider->blockSignals(true);
+        weight_slider->setValue(neuron->calculateWeightPercentage(value)*1000);
+        weight_slider->blockSignals(false);
+        neuron->setWeight(value);
+    });
+    connect(phase_spin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [neuron, phase_slider] (double value)
+    {
+        phase_slider->blockSignals(true);
+        phase_slider->setValue(neuron->calculateCPercentage(value)*1000);
+        phase_slider->blockSignals(false);
+        neuron->setC(value);
+    });
+
+    // Set initial value to spins, sliders should be updated automagically with the signals
+    amplitude_spin->setValue(neuron->getAmplitude());
+    offset_spin->setValue(neuron->getOffset());
+    weight_spin->setValue(neuron->getWeight());
+    phase_spin->setValue(neuron->getC());
+
+    return grid_layout;
 }
 
 void Chart::setUpdateTimerDelay(int delay)

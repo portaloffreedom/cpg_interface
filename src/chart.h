@@ -26,7 +26,7 @@
 class XYSeriesIODevice;
 class RythmGeneratorTimed;
 class QAudioInput;
-class QFormLayout;
+class QLayout;
 
 namespace revolve {
 namespace brain {
@@ -54,7 +54,7 @@ public slots:
     void setUpdateTimerDelay(int delay);
 
 private:
-    QFormLayout *add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *neuron);
+    QLayout *add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *neuron);
 
 private:
     RythmGeneratorTimed *m_rythm;
