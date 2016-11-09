@@ -21,9 +21,11 @@ set(cpg_interface_SRC
   src/xyseriesiodevice.cpp
   src/rythmgeneratortimed.cpp
   src/patternformation.cpp
+  src/motionneuron.cpp
   src/tochart.cpp
   src/rythmtochart.cpp
   src/patterntochart.cpp
+  src/mototochart.cpp
 )
 
 # Create code from a list of Qt designer ui files.

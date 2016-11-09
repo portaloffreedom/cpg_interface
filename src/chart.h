@@ -25,6 +25,7 @@
 
 class RythmGeneratorTimed;
 class PatternFormation;
+class MotionNeuron;
 class QLayout;
 
 namespace revolve {
@@ -58,6 +59,7 @@ private:
 private:
     RythmGeneratorTimed *m_rythm;
     PatternFormation *m_pattern_formation;
+    MotionNeuron *m_motion_neuron;
 
     QLineSeries *m_series_e;
     QLineSeries *m_series_f;
@@ -69,6 +71,8 @@ private:
     QLineSeries *m_series_f_pf;
     QLineSeries *m_series_d_pf;
 
+    QLineSeries *m_series_mn;
+
     QChart *m_chart_e;
     QChart *m_chart_f;
     QChart *m_chart_d;
@@ -76,6 +80,8 @@ private:
     QChart *m_chart_e_pf;
     QChart *m_chart_f_pf;
     QChart *m_chart_d_pf;
+
+    QChart *m_chart_mn;
 };
 
 #endif // CHART_H

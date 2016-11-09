@@ -32,6 +32,8 @@
 #include "rythmtochart.h"
 #include "patternformation.h"
 #include "patterntochart.h"
+#include "motionneuron.h"
+#include "mototochart.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -63,12 +65,17 @@ Chart::Chart(QWidget *parent)
     , m_series_d(nullptr)
     , m_series_phi_e(nullptr)
     , m_series_phi_f(nullptr)
+    , m_series_e_pf(nullptr)
+    , m_series_f_pf(nullptr)
+    , m_series_d_pf(nullptr)
+    , m_series_mn(nullptr)
     , m_chart_e(nullptr)
     , m_chart_f(nullptr)
     , m_chart_d(nullptr)
     , m_chart_e_pf(nullptr)
     , m_chart_f_pf(nullptr)
     , m_chart_d_pf(nullptr)
+    , m_chart_mn(nullptr)
 {
     unsigned int history = 100; //points
     unsigned int timer_wait = 30; //ms
@@ -81,6 +88,8 @@ Chart::Chart(QWidget *parent)
     m_chart_f_pf = new QChart;
     m_chart_d_pf = new QChart;
 
+    m_chart_mn = new QChart;
+
     QChartView *chartView_e = new QChartView(m_chart_e, this);
     QChartView *chartView_f = new QChartView(m_chart_f, this);
     QChartView *chartView_d = new QChartView(m_chart_d, this);
@@ -89,6 +98,8 @@ Chart::Chart(QWidget *parent)
     QChartView *chartView_f_pf = new QChartView(m_chart_f_pf, this);
     QChartView *chartView_d_pf = new QChartView(m_chart_d_pf, this);
 
+    QChartView *chartView_mn = new QChartView(m_chart_mn, this);
+
     chartView_e->setMinimumSize(400,400);
     chartView_f->setMinimumSize(400,400);
     chartView_d->setMinimumSize(400,400);
@@ -96,6 +107,8 @@ Chart::Chart(QWidget *parent)
     chartView_e_pf->setMinimumSize(400,400);
     chartView_f_pf->setMinimumSize(400,400);
     chartView_d_pf->setMinimumSize(400,400);
+
+    chartView_mn->setMinimumSize(400,400);
 
     m_series_e = new QLineSeries;
     m_series_phi_e = new QLineSeries;
@@ -107,6 +120,8 @@ Chart::Chart(QWidget *parent)
     m_series_f_pf = new QLineSeries;
     m_series_d_pf = new QLineSeries;
 
+    m_series_mn = new QLineSeries;
+
     m_chart_e->addSeries(m_series_e);
     m_chart_e->addSeries(m_series_phi_e);
     m_chart_f->addSeries(m_series_f);
@@ -116,6 +131,8 @@ Chart::Chart(QWidget *parent)
     m_chart_e_pf->addSeries(m_series_e_pf);
     m_chart_f_pf->addSeries(m_series_f_pf);
     m_chart_d_pf->addSeries(m_series_d_pf);
+
+    m_chart_mn->addSeries(m_series_mn);
 
     QValueAxis *axisX;
     QValueAxis *axisY;
@@ -208,6 +225,18 @@ Chart::Chart(QWidget *parent)
     m_series_d_pf->attachAxis(axisX);
     m_series_d_pf->attachAxis(axisY);
 
+    // MN
+    axisX = createXAxis("Samples", history);
+    axisY = createYAxis("Difference", -1, 1);
+    m_chart_mn->legend()->hide();
+    m_chart_mn->setTitle("Moto Neuron");
+    axisY->setLinePenColor(m_series_mn->pen().color());
+
+    m_chart_mn->addAxis(axisX, Qt::AlignBottom);
+    m_chart_mn->addAxis(axisY, Qt::AlignLeft);
+    m_series_mn->attachAxis(axisX);
+    m_series_mn->attachAxis(axisY);
+
     // rythm generator and chart-rythm connection
     m_rythm = new RythmGeneratorTimed(timer_wait,this);
     RythmToChart *to_chart = new RythmToChart(
@@ -228,6 +257,16 @@ Chart::Chart(QWidget *parent)
         m_series_f_pf,
         m_series_d_pf,
         m_pattern_formation,
+        history,
+        this);
+
+
+    m_motion_neuron = new MotionNeuron(this);
+    connect(m_pattern_formation, &PatternFormation::neuron_output,
+            m_motion_neuron, &MotionNeuron::neuron_activate);
+    MotoToChart *mn_to_chart = new MotoToChart(
+        m_series_mn,
+        m_motion_neuron,
         history,
         this);
 
@@ -267,6 +306,7 @@ Chart::Chart(QWidget *parent)
     mainLayout->addWidget(chartView_f_pf, 2, 2);
     mainLayout->addWidget(chartView_d_pf, 2, 3);
 
+    mainLayout->addWidget(chartView_mn, 3, 3);
 
     setLayout(mainLayout);
 
