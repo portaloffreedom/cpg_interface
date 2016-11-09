@@ -23,9 +23,8 @@
 #include <QWidget>
 #include <QtCharts/QChartGlobal>
 
-class XYSeriesIODevice;
 class RythmGeneratorTimed;
-class QAudioInput;
+class PatternFormation;
 class QLayout;
 
 namespace revolve {
@@ -58,16 +57,25 @@ private:
 
 private:
     RythmGeneratorTimed *m_rythm;
-    XYSeriesIODevice *m_device;
+    PatternFormation *m_pattern_formation;
+
     QLineSeries *m_series_e;
     QLineSeries *m_series_f;
     QLineSeries *m_series_d;
     QLineSeries *m_series_phi_e;
     QLineSeries *m_series_phi_f;
+
+    QLineSeries *m_series_e_pf;
+    QLineSeries *m_series_f_pf;
+    QLineSeries *m_series_d_pf;
+
     QChart *m_chart_e;
     QChart *m_chart_f;
     QChart *m_chart_d;
-    QAudioInput *m_audioInput;
+
+    QChart *m_chart_e_pf;
+    QChart *m_chart_f_pf;
+    QChart *m_chart_d_pf;
 };
 
 #endif // CHART_H

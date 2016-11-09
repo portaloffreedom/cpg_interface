@@ -17,38 +17,31 @@
  *
  */
 
-#include "rythmtochart.h"
+#include "patterntochart.h"
 
-#include <QLineSeries>
-
-RythmToChart::RythmToChart(QtCharts::QXYSeries* series_e,
-                           QtCharts::QXYSeries *series_f,
-                           QtCharts::QXYSeries *series_d,
-                           QtCharts::QXYSeries* series_phi_e,
-                           QtCharts::QXYSeries *series_phi_f,
-                           RythmGeneratorTimed* rythm_generator_timed,
-                           qint64 range,
-                           QObject* parent)
+PatternToChart::PatternToChart(QtCharts::QXYSeries* series_e,
+                               QtCharts::QXYSeries* series_f,
+                               QtCharts::QXYSeries* series_d,
+                               PatternFormation* pattern_formation,
+                               qint64 range,
+                               QObject* parent)
     : ToChart(range, parent)
     , m_series_e(series_e)
     , m_series_f(series_f)
     , m_series_d(series_d)
-    , m_series_phi_e(series_phi_e)
-    , m_series_phi_f(series_phi_f)
-    , m_rythm_generator_timed(rythm_generator_timed)
+    , m_pattern_formation(pattern_formation)
 {
-    connect(m_rythm_generator_timed, &RythmGeneratorTimed::neuron_output,
-            this, &RythmToChart::dataReady);
+    connect(m_pattern_formation, &PatternFormation::neuron_output,
+            this, &PatternToChart::dataReady);
 }
 
-void RythmToChart::dataReady(float e, float f, float phi_e, float phi_f)
+
+void PatternToChart::dataReady(float e, float f)
 {
     addPoint(m_series_e, e);
     addPoint(m_series_f, f);
     addPoint(m_series_d, e-f);
-    addPoint(m_series_phi_e, phi_e);
-    addPoint(m_series_phi_f, phi_f);
 }
 
 
-#include "rythmtochart.moc"
+#include "patterntochart.moc"

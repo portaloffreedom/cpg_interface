@@ -17,35 +17,30 @@
  *
  */
 
-#ifndef RYTHMTOCHART_H
-#define RYTHMTOCHART_H
+#ifndef PATTERNTOCHART_H
+#define PATTERNTOCHART_H
 
 #include "tochart.h"
-#include "rythmgeneratortimed.h"
+#include "patternformation.h"
 
-class RythmToChart : public ToChart
+class PatternToChart : public ToChart
 {
     Q_OBJECT
 public:
-    RythmToChart(QtCharts::QXYSeries* series_e,
-                 QtCharts::QXYSeries* series_f,
-                 QtCharts::QXYSeries* series_d,
-                 QtCharts::QXYSeries* series_phi_e,
-                 QtCharts::QXYSeries *series_phi_f,
-                 RythmGeneratorTimed* rythm_generator_timed,
-                 qint64 range,
-                 QObject* parent = nullptr);
-
+    PatternToChart(QtCharts::QXYSeries* series_e,
+                   QtCharts::QXYSeries* series_f,
+                   QtCharts::QXYSeries* series_d,
+                   PatternFormation* pattern_formation,
+                   qint64 range,
+                   QObject* parent = nullptr);
 public slots:
-    void dataReady(float e, float f, float phi_e, float phi_f);
+    void dataReady(float e, float f);
 
 private:
     QtCharts::QXYSeries *m_series_e;
     QtCharts::QXYSeries *m_series_f;
     QtCharts::QXYSeries *m_series_d;
-    QtCharts::QXYSeries *m_series_phi_e;
-    QtCharts::QXYSeries *m_series_phi_f;
-    RythmGeneratorTimed *m_rythm_generator_timed;
+    PatternFormation *m_pattern_formation;
 };
 
-#endif // RYTHMTOCHART_H
+#endif // PATTERNTOCHART_H

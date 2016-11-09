@@ -9,7 +9,6 @@ set(CMAKE_AUTOMOC ON)
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Charts REQUIRED)
-find_package(Qt5Multimedia REQUIRED)
 
 # add revolve neat
 add_subdirectory(../revolve-brain/cpp revolve-brain)
@@ -21,7 +20,10 @@ set(cpg_interface_SRC
   src/chart.cpp
   src/xyseriesiodevice.cpp
   src/rythmgeneratortimed.cpp
+  src/patternformation.cpp
+  src/tochart.cpp
   src/rythmtochart.cpp
+  src/patterntochart.cpp
 )
 
 # Create code from a list of Qt designer ui files.
@@ -32,7 +34,7 @@ qt5_wrap_ui(cpg_interface_SRC src/cpg_interface.ui)
 add_executable(cpg_interface ${cpg_interface_SRC})
 
 # Use the Widgets module from Qt 5.
-target_link_libraries(cpg_interface cpg Qt5::Widgets Qt5::Charts Qt5::Multimedia)
+target_link_libraries(cpg_interface cpg Qt5::Widgets Qt5::Charts)
 
 # Install the executable
 install(TARGETS cpg_interface DESTINATION bin)

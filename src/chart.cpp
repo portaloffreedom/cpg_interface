@@ -18,8 +18,6 @@
  */
 
 #include "chart.h"
-#include <QtMultimedia/QAudioDeviceInfo>
-#include <QtMultimedia/QAudioInput>
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QChart>
@@ -30,18 +28,47 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtCharts/QValueAxis>
-#include "xyseriesiodevice.h"
 #include "rythmgeneratortimed.h"
 #include "rythmtochart.h"
+#include "patternformation.h"
+#include "patterntochart.h"
 
 QT_CHARTS_USE_NAMESPACE
+
+QValueAxis *createXAxis(const char* name, unsigned int history = 100)
+{
+    QValueAxis *axisX = new QValueAxis;
+    axisX->setRange(0, history);
+    axisX->setLabelFormat("%g");
+    axisX->setTitleText(name);
+
+    return axisX;
+}
+
+QValueAxis *createYAxis(const char* name, qreal min = -1, qreal max = 1)
+{
+    QValueAxis *axisY = new QValueAxis;
+
+    axisY = new QValueAxis;
+    axisY->setRange(min, max);
+    axisY->setTitleText(name);
+
+    return axisY;
+}
 
 Chart::Chart(QWidget *parent)
     : QWidget(parent)
     , m_series_e(nullptr)
     , m_series_f(nullptr)
+    , m_series_d(nullptr)
+    , m_series_phi_e(nullptr)
+    , m_series_phi_f(nullptr)
     , m_chart_e(nullptr)
     , m_chart_f(nullptr)
+    , m_chart_d(nullptr)
+    , m_chart_e_pf(nullptr)
+    , m_chart_f_pf(nullptr)
+    , m_chart_d_pf(nullptr)
 {
     unsigned int history = 100; //points
     unsigned int timer_wait = 30; //ms
@@ -49,38 +76,55 @@ Chart::Chart(QWidget *parent)
     m_chart_e = new QChart;
     m_chart_f = new QChart;
     m_chart_d = new QChart;
+
+    m_chart_e_pf = new QChart;
+    m_chart_f_pf = new QChart;
+    m_chart_d_pf = new QChart;
+
     QChartView *chartView_e = new QChartView(m_chart_e, this);
     QChartView *chartView_f = new QChartView(m_chart_f, this);
     QChartView *chartView_d = new QChartView(m_chart_d, this);
+
+    QChartView *chartView_e_pf = new QChartView(m_chart_e_pf, this);
+    QChartView *chartView_f_pf = new QChartView(m_chart_f_pf, this);
+    QChartView *chartView_d_pf = new QChartView(m_chart_d_pf, this);
+
     chartView_e->setMinimumSize(400,400);
     chartView_f->setMinimumSize(400,400);
     chartView_d->setMinimumSize(400,400);
+
+    chartView_e_pf->setMinimumSize(400,400);
+    chartView_f_pf->setMinimumSize(400,400);
+    chartView_d_pf->setMinimumSize(400,400);
+
     m_series_e = new QLineSeries;
     m_series_phi_e = new QLineSeries;
     m_series_f = new QLineSeries;
     m_series_phi_f = new QLineSeries;
     m_series_d = new QLineSeries;
+
+    m_series_e_pf = new QLineSeries;
+    m_series_f_pf = new QLineSeries;
+    m_series_d_pf = new QLineSeries;
+
     m_chart_e->addSeries(m_series_e);
     m_chart_e->addSeries(m_series_phi_e);
     m_chart_f->addSeries(m_series_f);
     m_chart_f->addSeries(m_series_phi_f);
     m_chart_d->addSeries(m_series_d);
 
+    m_chart_e_pf->addSeries(m_series_e_pf);
+    m_chart_f_pf->addSeries(m_series_f_pf);
+    m_chart_d_pf->addSeries(m_series_d_pf);
+
     QValueAxis *axisX;
     QValueAxis *axisY;
     QValueAxis *axisY_phi;
 
-    // E
-    axisX = new QValueAxis;
-    axisX->setRange(0, history);
-    axisX->setLabelFormat("%g");
-    axisX->setTitleText("Samples");
-    axisY = new QValueAxis;
-    axisY->setRange(-1, 1);
-    axisY->setTitleText("Value level");
-    axisY_phi = new QValueAxis;
-    axisY_phi->setRange(-100000, 100000);
-    axisY_phi->setTitleText("Phi");
+    // RGE
+    axisX = createXAxis("Samples", history);
+    axisY = createYAxis("Value level");
+    axisY_phi = createYAxis("Phi",-100000, 100000);
 
     m_chart_e->legend()->hide();
     m_chart_e->setTitle("Data from the neuron e");
@@ -95,17 +139,10 @@ Chart::Chart(QWidget *parent)
     m_series_phi_e->attachAxis(axisX);
     m_series_phi_e->attachAxis(axisY_phi);
 
-    // F
-    axisX = new QValueAxis;
-    axisX->setRange(0, history);
-    axisX->setLabelFormat("%g");
-    axisX->setTitleText("Samples");
-    axisY = new QValueAxis;
-    axisY->setRange(-1, 1);
-    axisY->setTitleText("Value level");
-    axisY_phi = new QValueAxis;
-    axisY_phi->setRange(-100000, 100000);
-    axisY_phi->setTitleText("Phi");
+    // RGF
+    axisX = createXAxis("Samples", history);
+    axisY = createYAxis("Value level");
+    axisY_phi = createYAxis("Phi",-100000, 100000);
 
     m_chart_f->legend()->hide();
     m_chart_f->setTitle("Data from the neuron f");
@@ -120,14 +157,9 @@ Chart::Chart(QWidget *parent)
     m_series_phi_f->attachAxis(axisX);
     m_series_phi_f->attachAxis(axisY_phi);
 
-    // Difference
-    axisX = new QValueAxis;
-    axisX->setRange(0, history);
-    axisX->setLabelFormat("%g");
-    axisX->setTitleText("Samples");
-    axisY = new QValueAxis;
-    axisY->setRange(-2, 2);
-    axisY->setTitleText("Difference");
+    // RG Difference
+    axisX = createXAxis("Samples", history);
+    axisY = createYAxis("Difference", -2, 2);
 
     m_chart_d->legend()->hide();
     m_chart_d->setTitle("subtraction of the two data");
@@ -136,6 +168,45 @@ Chart::Chart(QWidget *parent)
     m_chart_d->addAxis(axisY, Qt::AlignLeft);
     m_series_d->attachAxis(axisX);
     m_series_d->attachAxis(axisY);
+
+    // PFE
+    axisX = createXAxis("Samples", history);
+    axisY = createYAxis("Value level", 0, 1);
+
+    m_chart_e_pf->legend()->hide();
+    m_chart_e_pf->setTitle("Pattern Formation E");
+    axisY->setLinePenColor(m_series_e_pf->pen().color());
+
+    m_chart_e_pf->addAxis(axisX, Qt::AlignBottom);
+    m_chart_e_pf->addAxis(axisY, Qt::AlignLeft);
+    m_series_e_pf->attachAxis(axisX);
+    m_series_e_pf->attachAxis(axisY);
+
+    // PFF
+    axisX = createXAxis("Samples", history);
+    axisY = createYAxis("Value level", 0, 1);
+
+    m_chart_f_pf->legend()->hide();
+    m_chart_f_pf->setTitle("Pattern Formation F");
+    axisY->setLinePenColor(m_series_f_pf->pen().color());
+
+    m_chart_f_pf->addAxis(axisX, Qt::AlignBottom);
+    m_chart_f_pf->addAxis(axisY, Qt::AlignLeft);
+    m_series_f_pf->attachAxis(axisX);
+    m_series_f_pf->attachAxis(axisY);
+
+    // PF Difference
+    axisX = createXAxis("Samples", history);
+    axisY = createYAxis("Difference", -2, 2);
+
+    m_chart_d_pf->legend()->hide();
+    m_chart_d_pf->setTitle("Difference in PF");
+    axisY->setLinePenColor(m_series_d_pf->pen().color());
+
+    m_chart_d_pf->addAxis(axisX, Qt::AlignBottom);
+    m_chart_d_pf->addAxis(axisY, Qt::AlignLeft);
+    m_series_d_pf->attachAxis(axisX);
+    m_series_d_pf->attachAxis(axisY);
 
     // rythm generator and chart-rythm connection
     m_rythm = new RythmGeneratorTimed(timer_wait,this);
@@ -149,8 +220,19 @@ Chart::Chart(QWidget *parent)
         history,
         this);
 
+    m_pattern_formation = new PatternFormation(this);
+    connect(m_rythm, &RythmGeneratorTimed::neuron_output,
+            m_pattern_formation, &PatternFormation::neuron_activate);
+    PatternToChart *p_to_chart = new PatternToChart(
+        m_series_e_pf,
+        m_series_f_pf,
+        m_series_d_pf,
+        m_pattern_formation,
+        history,
+        this);
 
-    QHBoxLayout *mainLayout = new QHBoxLayout;
+
+    QGridLayout *mainLayout = new QGridLayout;
 
     {
         QVBoxLayout *e_layout = new QVBoxLayout;
@@ -158,7 +240,8 @@ Chart::Chart(QWidget *parent)
         QLayout *form_layout = add_control_layout(m_rythm->getRGE());
         e_layout->addLayout(form_layout);
 
-        mainLayout->addLayout(e_layout);
+
+        mainLayout->addLayout(e_layout, 1, 1);
     }
 
     {
@@ -167,45 +250,31 @@ Chart::Chart(QWidget *parent)
         QLayout *form_layout = add_control_layout(m_rythm->getRGF());
         f_layout->addLayout(form_layout);
 
-        mainLayout->addLayout(f_layout);
+
+        mainLayout->addLayout(f_layout, 1, 2);
     }
 
     {
         QVBoxLayout *d_layout = new QVBoxLayout;
         d_layout->addWidget(chartView_d);
 
-        mainLayout->addLayout(d_layout);
+
+        mainLayout->addLayout(d_layout, 1, 3);
     }
 
 
+    mainLayout->addWidget(chartView_e_pf, 2, 1);
+    mainLayout->addWidget(chartView_f_pf, 2, 2);
+    mainLayout->addWidget(chartView_d_pf, 2, 3);
 
 
     setLayout(mainLayout);
-
-//     QAudioFormat formatAudio;
-//     formatAudio.setSampleRate(8000);
-//     formatAudio.setChannelCount(1);
-//     formatAudio.setSampleSize(8);
-//     formatAudio.setCodec("audio/pcm");
-//     formatAudio.setByteOrder(QAudioFormat::LittleEndian);
-//     formatAudio.setSampleType(QAudioFormat::UnSignedInt);
-
-//     QAudioDeviceInfo inputDevices = QAudioDeviceInfo::defaultInputDevice();
-//     m_audioInput = new QAudioInput(inputDevices,formatAudio, this);
-
-//     m_device = new XYSeriesIODevice(m_series, this);
-//     m_device->open(QIODevice::WriteOnly);
-//
-//     m_audioInput->start(m_device);
-
 
     m_rythm->start();
 }
 
 Chart::~Chart()
 {
-    m_audioInput->stop();
-    m_device->close();
 }
 
 
@@ -350,3 +419,6 @@ void Chart::setUpdateTimerDelay(int delay)
 
 
 #include "chart.moc"
+#include "patterntochart.h"
+#include "patterntochart.h"
+#include "patterntochart.h"
