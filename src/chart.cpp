@@ -419,6 +419,3 @@ void Chart::setUpdateTimerDelay(int delay)
 
 
 #include "chart.moc"
-#include "patterntochart.h"
-#include "patterntochart.h"
-#include "patterntochart.h"
