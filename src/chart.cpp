@@ -303,7 +303,9 @@ Chart::Chart(QWidget *parent)
 
 
     mainLayout->addWidget(chartView_e_pf, 2, 1);
+    mainLayout->addLayout(add_control_layout(m_pattern_formation->getPFE()), 3, 1);
     mainLayout->addWidget(chartView_f_pf, 2, 2);
+    mainLayout->addLayout(add_control_layout(m_pattern_formation->getPFF()), 3, 2);
     mainLayout->addWidget(chartView_d_pf, 2, 3);
 
     mainLayout->addWidget(chartView_mn, 3, 3);
@@ -323,8 +325,6 @@ QLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *n
     static const char number_format = 'f';
     static const int number_precision = 2;
 
-
-    QGridLayout *grid_layout = new QGridLayout;
 
     QSlider *amplitude_slider = new QSlider(Qt::Horizontal, this);
     QSlider *offset_slider = new QSlider(Qt::Horizontal, this);
@@ -366,6 +366,7 @@ QLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *n
     phase_spin->setMaximum(neuron->C_MAX);
 
 
+    QGridLayout *grid_layout = new QGridLayout;
     grid_layout->addWidget(amplitude_value_label, 1, 1);
     grid_layout->addWidget(amplitude_spin       , 1, 2);
     grid_layout->addWidget(amplitude_slider     , 1, 3);
@@ -422,6 +423,7 @@ QLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *n
     {
         offset_slider->blockSignals(true);
         offset_slider->setValue(neuron->calculateOffsetPercentage(value)*1000);
+        offset_slider->blockSignals(false);
         neuron->setOffset(value);
     });
     connect(weight_spin,
@@ -451,6 +453,84 @@ QLayout *Chart::add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *n
 
     return grid_layout;
 }
+
+QLayout * Chart::add_control_layout(revolve::brain::cpg::PatternFormationNeuron* neuron)
+{
+    static const char number_format = 'f';
+    static const int number_precision = 2;
+
+
+    QSlider *alpha_slider = new QSlider(Qt::Horizontal, this);
+    QSlider *theta_slider = new QSlider(Qt::Horizontal, this);
+
+    QLabel *alpha_value_label = new QLabel("alpha", this);
+    QLabel *theta_value_label = new QLabel("theta", this);
+
+    alpha_slider->setMinimum(0);
+    theta_slider->setMinimum(0);
+    alpha_slider->setMaximum(1000);
+    theta_slider->setMaximum(1000);
+
+    QDoubleSpinBox *alpha_spin = new QDoubleSpinBox(this);
+    QDoubleSpinBox *theta_spin = new QDoubleSpinBox(this);
+
+    alpha_spin->setSingleStep(0.05);
+    theta_spin->setSingleStep(0.05);
+
+    alpha_spin->setMinimum(neuron->ALPHA_MIN);
+    alpha_spin->setMaximum(neuron->ALPHA_MAX);
+    theta_spin->setMinimum(neuron->THETA_MIN);
+    theta_spin->setMaximum(neuron->THETA_MAX);
+
+
+    QGridLayout *grid_layout = new QGridLayout;
+    grid_layout->addWidget(alpha_value_label, 1, 1);
+    grid_layout->addWidget(alpha_spin       , 1, 2);
+    grid_layout->addWidget(alpha_slider     , 1, 3);
+    grid_layout->addWidget(theta_value_label, 2, 1);
+    grid_layout->addWidget(theta_spin       , 2, 2);
+    grid_layout->addWidget(theta_slider     , 2, 3);
+
+    // Sliders connections
+    connect(alpha_slider, &QSlider::valueChanged, [neuron, alpha_spin] (int value) {
+        float new_value = neuron->setAlphaPercentage(value/1000.0);
+        alpha_spin->blockSignals(true);
+        alpha_spin->setValue(new_value);
+        alpha_spin->blockSignals(false);
+    });
+    connect(theta_slider, &QSlider::valueChanged, [neuron, theta_spin] (int value) {
+        float new_value = neuron->setThetaPercentage(value/1000.0);
+        theta_spin->blockSignals(true);
+        theta_spin->setValue(new_value);
+        theta_spin->blockSignals(false);
+    });
+
+    // Spin connections
+    connect(alpha_spin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [neuron, alpha_slider] (double value)
+    {
+        alpha_slider->blockSignals(true);
+        alpha_slider->setValue(neuron->calculateAlphaPercentage(value)*1000);
+        alpha_slider->blockSignals(false);
+        neuron->setAlpha(value);
+    });
+    connect(theta_spin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [neuron, theta_slider] (double value)
+    {
+        theta_slider->blockSignals(true);
+        theta_slider->setValue(neuron->calculateThetaPercentage(value)*1000);
+        theta_slider->blockSignals(false);
+        neuron->setTheta(value);
+    });
+
+    alpha_spin->setValue(neuron->getAlpha());
+    theta_spin->setValue(neuron->getTheta());
+
+    return grid_layout;
+}
+
 
 void Chart::setUpdateTimerDelay(int delay)
 {

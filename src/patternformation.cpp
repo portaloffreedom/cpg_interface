@@ -49,4 +49,16 @@ void PatternFormation::neuron_activate(float e, float f)
 
     emit neuron_output(result_e, result_f);
 }
+
+revolve::brain::cpg::PatternFormationNeuron * PatternFormation::getPFE()
+{
+    return pfe;
+}
+
+revolve::brain::cpg::PatternFormationNeuron * PatternFormation::getPFF()
+{
+    return pff;
+}
+
+
 #include "patternformation.moc"

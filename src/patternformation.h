@@ -30,6 +30,9 @@ public:
     PatternFormation(QObject *parent = nullptr);
     ~PatternFormation();
 
+    revolve::brain::cpg::PatternFormationNeuron *getPFE();
+    revolve::brain::cpg::PatternFormationNeuron *getPFF();
+
 public slots:
     void neuron_activate(float e, float f);
 

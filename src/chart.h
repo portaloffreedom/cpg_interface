@@ -33,6 +33,7 @@ namespace brain {
 namespace cpg {
 
 class RythmGenerationNeuron;
+class PatternFormationNeuron;
 
 }}}
 
@@ -55,6 +56,7 @@ public slots:
 
 private:
     QLayout *add_control_layout(revolve::brain::cpg::RythmGenerationNeuron *neuron);
+    QLayout *add_control_layout(revolve::brain::cpg::PatternFormationNeuron *neuron);
 
 private:
     RythmGeneratorTimed *m_rythm;
