@@ -45,6 +45,7 @@ RythmGeneratorTimed::~RythmGeneratorTimed()
 void RythmGeneratorTimed::start()
 {
     timer->start();
+    beg_ = clock_::now();
 }
 
 revolve::brain::cpg::RythmGenerationNeuron * RythmGeneratorTimed::getRGE()
@@ -62,9 +63,12 @@ void RythmGeneratorTimed::generate_output()
     using namespace revolve::brain;
     float output_e, output_f;
 
-    cpg::real_t delta_time = 0.1;
     cpg::real_t phi_e = rge->getPhi();
     cpg::real_t phi_f = rgf->getPhi();
+
+    cpg::real_t delta_time = std::chrono::duration_cast<second_>
+            (clock_::now() - beg_).count();
+    beg_ = clock_::now();
 
     std::vector<float> result_e = rge->update({phi_f}, delta_time);
     std::vector<float> result_f = rgf->update({phi_e}, delta_time);

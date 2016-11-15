@@ -23,6 +23,7 @@
 #include "brain/cpg/RythmGenerationNeuron.h"
 #include <QObject>
 #include <QTimer>
+#include <chrono>
 
 class RythmGeneratorTimed : public QObject
 {
@@ -51,6 +52,11 @@ private:
 
     revolve::brain::cpg::RythmGenerationNeuron *rge;
     revolve::brain::cpg::RythmGenerationNeuron *rgf;
+
+    // Delta time calculation required bits
+    typedef std::chrono::high_resolution_clock clock_;
+    typedef std::chrono::duration<double, std::ratio<1> > second_;
+    std::chrono::time_point<clock_> beg_;
 };
 
 #endif // RYTHMGENERATORTIMED_H
